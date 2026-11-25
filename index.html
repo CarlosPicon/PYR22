@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Conteo físico y catálogo de Partes y Repuestos La 22"><title>Inventario | Partes y Repuestos La 22</title><style>
+:root{font:16px system-ui,sans-serif;color:#172337;background:#f1f4f8;--blue:#143e91;--line:#dbe2ec}*{box-sizing:border-box}body{margin:0}header{background:#121f35;color:white;padding:1rem max(1rem, calc((100% - 1100px)/2));display:flex;align-items:center;gap:.8rem}.logo{display:grid;place-items:center;background:#f9c344;color:#121f35;border-radius:10px;width:44px;height:44px;font-size:1.3rem;font-weight:850;flex:none}header small{display:block;color:#bac9df;margin-top:.2rem}main{max-width:1132px;margin:auto;padding:1.4rem 1rem 3rem}.hero{background:#142d58;color:white;border-radius:16px;padding:1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}h1,h2,h3,p{margin:0}h1{font-size:clamp(1.65rem,4vw,2.45rem);letter-spacing:-.035em}.hero p{margin-top:.5rem;color:#d9e5fa}.stats,.filters,.form-grid{display:grid;gap:.8rem}.stats{grid-template-columns:repeat(3,1fr);margin:1rem 0}.stats button{background:white;border:1px solid var(--line);text-align:left;padding:.8rem;color:#263752;min-width:0}.stats strong{display:block;font-size:1.45rem;color:#142d58}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:1rem}.tabs,.actions,.summary{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}.tabs{margin-bottom:1rem}button{font:inherit;font-weight:650;cursor:pointer;border-radius:8px;border:1px solid var(--line);padding:.55rem .8rem;min-height:44px;color:#183253;background:white}button[aria-pressed=true],.primary{background:var(--blue);color:white;border-color:var(--blue)}.hero button{background:#f9c344;border-color:#f9c344;color:#182841}.filters{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}.search{grid-column:1/-1}label{display:grid;gap:.35rem;font-size:.9rem;font-weight:650;min-width:0}input,select,textarea{font:inherit;font-size:1rem;border:1px solid #bcc9da;border-radius:8px;background:white;color:inherit;padding:.55rem .65rem;min-height:44px;width:100%}textarea{resize:vertical}.summary{justify-content:space-between;margin:1.2rem 0 .7rem}.muted,small{color:#52627a;font-size:.88rem}.list{display:grid;gap:.6rem}.card{border:1px solid var(--line);border-radius:10px;padding:.9rem;display:grid;gap:.55rem;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;align-items:center}.card h3{font-size:1rem;overflow-wrap:anywhere}.card p{margin-top:.3rem;overflow-wrap:anywhere}.tag{font-size:.85rem;font-weight:700;color:#164e39;background:#e2f3e9;padding:.25rem .5rem;border-radius:6px;display:inline-block}.tag.warn{color:#744500;background:#fff0c9}.tag.zero{color:#8b2d29;background:#fce6e3}.empty{padding:2rem 1rem;text-align:center;background:#f4f7fc;border-radius:10px}.empty p{margin-top:.5rem}.tools{margin-top:1rem}.notice{margin:.8rem 0;min-height:1.25em;color:#154d39}.error{color:#992c26}dialog{width:min(560px,calc(100% - 1rem));max-height:calc(100% - 1rem);border:0;border-radius:14px;padding:1.2rem;color:inherit;box-shadow:0 12px 60px #15223855}dialog::backdrop{background:#101c32aa}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin:1rem 0}.wide{grid-column:1/-1}.dialog-actions{justify-content:flex-end}.count-location{margin-top:.5rem}.catalog .card{grid-template-columns:2fr 1fr auto}.catalog .card small{display:block}.help{margin-top:.6rem}:focus-visible{outline:3px solid #2678dd;outline-offset:2px}[hidden]{display:none!important}@media(max-width:690px){.card,.catalog .card{grid-template-columns:repeat(2,minmax(0,1fr))}.card>div:first-child{grid-column:1/-1}.card .actions{grid-column:1/-1}.card .actions button{flex:1}.stats{gap:.45rem}.stats button{padding:.55rem;font-size:.86rem}.panel{padding:.75rem}.hero{padding:1.15rem}}
+.actions button.remove{flex:none;min-height:36px;padding:.3rem .55rem;font-size:.875rem;color:#982528}[hidden]{display:none!important}</style></head><body>
+<header><div class="logo" aria-hidden="true">22</div><div><strong>Partes y Repuestos La 22</strong><small>Bucaramanga · Gestión de inventario</small></div></header>
+<section id="acceso" style="max-width:420px;margin:2rem auto;padding:1rem"><h1>Inventario PYR22</h1><form id="login"><label>Correo<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Ingresar</button></form><p id="loginStatus" role="status"></p></section><main hidden><section class="hero"><div><h1>Inventario de repuestos</h1><p>Cuenta por ubicación y encuentra el repuesto para cada vehículo.</p></div><div><button id="add">Nuevo repuesto</button> <button id="reload">Actualizar vista</button> <button id="logout">Cerrar sesión</button></div></section>
+<section class="stats" aria-label="Resumen"><button data-status=""><strong id="total">0</strong>Repuestos</button><button data-status="pending"><strong id="pending">0</strong>Por contar</button><button data-status="zero"><strong id="zero">0</strong>Agotados</button></section>
+<section class="panel"><nav class="tabs" aria-label="Vistas"><button data-view="stock" aria-pressed="true">Inventario</button><button data-view="count" aria-pressed="false">Conteo físico</button><button data-view="duplicates" aria-pressed="false">Referencias repetidas</button><button data-view="catalog" aria-pressed="false">Catálogo comercial</button></nav>
+<div class="filters"><label class="search">Buscar repuestos<input id="query" type="search" placeholder="Referencia, nombre o Dodge Journey"></label><label>Categoría<select id="category"></select></label><label>Marca<select id="brand"></select></label><label>Vehículo<select id="vehicle"></select></label><label>Ubicación<select id="location"></select></label><label id="stateLabel">Estado<select id="state"><option value="">Todos</option><option value="pending">Por contar</option><option value="missing">Sin cantidad</option><option value="stale">Desactualizado</option><option value="zero">Agotado verificado</option><option value="ready">Disponible verificado</option></select></label></div>
+<div class="summary"><div><h2 id="heading">Repuestos</h2><p id="result" class="muted"></p></div><div class="actions"><button id="clear">Limpiar filtros</button><button id="csv" hidden>Descargar catálogo CSV</button></div></div><p id="notice" class="notice" role="status"></p><div id="list" class="list"></div><nav id="pages" class="actions tools" aria-label="Paginación" hidden><button id="prev">Anterior</button><span id="pageLabel" class="muted"></span><button id="next">Siguiente</button></nav></section>
+<details class="tools panel"><summary>Respaldo y configuración</summary><p class="muted help">Guarda una copia JSON para recuperar el inventario o llevarlo a otro dispositivo. Las ediciones se guardan en este navegador.</p><div class="actions tools"><button id="backup">Descargar respaldo</button><button id="restore">Restaurar respaldo</button><input id="file" type="file" accept=".json,application/json" hidden><button id="recount">Marcar todo para reconteo</button></div></details></main>
+<dialog id="editor"><form id="form"><h2 id="editorTitle">Nuevo repuesto</h2><div class="form-grid"><label>Nombre<input name="name"></label><label>Categoría<input name="category" list="categories" placeholder="Elige o escribe una categoría"><small>Una categoría nueva se agrega al guardar.</small></label><label>Marca del repuesto<input name="brand" list="brands"></label><label>Referencia<input name="ref"></label><label>Precio (COP)<input name="price" type="number" min="0" step="1" inputmode="numeric"></label><label class="wide">Vehículos compatibles<input name="vehicle" placeholder="Dodge Journey, Fiat Freemont"><small>Separa los vehículos con comas.</small></label><label>Tipo de almacenamiento<select name="type"><option value="">Por confirmar</option><option>Estante</option><option>Cajón</option><option>Vitrina</option></select></label><label>Ubicación<input name="location" placeholder="H3-4" autocapitalize="characters"></label><label>Cantidad física<input name="qty" type="number" min="0" step="1" inputmode="numeric"><small>Déjala vacía si aún no has contado.</small></label><label>Proveedor<input name="supplier"></label><label>Costo unitario (COP)<input name="cost" inputmode="decimal"></label><label>Costo con IVA (COP)<input name="costTax" inputmode="decimal"></label><label>Venta con 15 % de descuento (COP)<input name="discount" inputmode="decimal"></label><label>Fila según Excel<input name="legacyAisle"></label><label>Estante según Excel<input name="legacyShelf"></label><label>Cantidad según Excel<input name="legacyQty" readonly></label><label class="wide">Observaciones<textarea name="notes" rows="2"></textarea></label></div><div class="actions dialog-actions"><button type="button" data-close>Cancelar</button><button class="primary">Guardar repuesto</button></div></form></dialog>
+<dialog id="counter"><form id="countForm"><h2 id="countTitle">Registrar conteo</h2><p id="countLocation" class="muted count-location"></p><div class="form-grid"><label class="wide">Unidades encontradas<input name="qty" type="number" inputmode="numeric" min="0" step="1" required placeholder="0 si no hay unidades"></label></div><div class="actions dialog-actions"><button type="button" data-close>Cancelar</button><button class="primary">Guardar conteo</button></div></form></dialog><datalist id="categories"></datalist><datalist id="brands"></datalist>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const db = window.supabase?.createClient('https://opavddbyfjkmwgudnwjf.supabase.co', 'sb_publishable_MqdFs9NWaF-JhcGuP7D6nw_rER3Zg3w');
+const main = document.querySelector('main');
+const revisions = new Map();
+let busy = false;
+const fields = ['name','category','brand','ref','vehicle','type','location','notes'];
+const extraFields = ['supplier','cost','costTax','discount','legacyAisle','legacyShelf','legacyQty'];
+const editableFields = [...fields,...extraFields];
+const filters = ['category','brand','vehicle','location'];
+const money = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+const norm = value => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const oldLocation = row => row.legacyAisle || row.legacyShelf ? 'Excel · Fila '+(row.legacyAisle||'—')+' · Estante '+(row.legacyShelf||'—') : '';
+const locationOptions = row => [row.location,oldLocation(row),row.location?'':'Por ubicar'].filter(Boolean);
+const vehicles = row => row.vehicle.split(',').map(item=>item.trim()).filter(Boolean);
+const displayName = row => row.name || row.ref || row.code || '';
+const defaultCategories = ["Abrazaderas", "Accesorios varios", "Amortiguadores", "Anillos de motor", "Antenas", "Balancines y buzos", "Balineras de embrague", "Bandas y zapatas de freno", "Bieletas y muñecos", "Bobinas de encendido", "Bocines y cubos de rueda", "Bombas de aceite", "Bombas de agua", "Bombas de combustible", "Bombas de freno", "Bombas y cilindros de clutch", "Bombillos y luces", "Bujes de barra estabilizadora", "Bujes de tijera", "Bujías", "Cables de alta", "Campanas de freno", "Casquetes de bancada", "Casquetes de biela", "Cilindros de freno", "Componentes eléctricos", "Correas de accesorios", "Correas de repartición", "Cuerpos de aceleración", "Depósitos de refrigerante", "Depósitos y tapas de freno", "Discos de freno", "Empaques de culata", "Empaques de cárter", "Empaques de motor", "Empaques de múltiple", "Empaques de tapa de válvulas", "Enfriadores de aceite", "Guardapolvos de transmisión", "Guayas de clutch", "Guayas de freno de mano", "Guayas y selectores de cambios", "Guías de válvula", "Interruptores y switches", "Inyectores y flautas", "Kits de clutch", "Kits de repartición", "Lubricantes y fluidos", "Mangueras y tubos de refrigeración", "Motoventiladores", "Módulos de combustible", "Otros bujes y soportes", "Pastillas de freno", "Pistones y camisas", "Pitos y bocinas", "Piñones de distribución", "Plumillas limpiaparabrisas", "Poleas y rodillos", "Puntas de eje y juntas homocinéticas", "Radiadores", "Refrigerantes", "Reparaciones de palanca de cambios", "Resistencias de motoventilador", "Retenedores y sellos de aceite", "Retenes de transmisión", "Rodamientos de amortiguador", "Rodamientos de rueda", "Rótulas", "Sellos de válvula", "Sensores de motor", "Sensores de oxígeno", "Sensores de temperatura", "Sensores de velocidad", "Sensores e interruptores de freno", "Siliconas y selladores", "Soportes de amortiguador", "Soportes de caja", "Soportes de motor", "Tapas de distribución", "Tapas de radiador y depósito", "Tensores de correa", "Terminales axiales", "Terminales de dirección", "Termostatos", "Tijeras de suspensión", "Tomas de agua y carcasas", "Tornillos de culata", "Varillas y tapas de aceite", "Válvulas PCV", "Válvulas de motor", "Árbol de levas"];
+const status = row => row.qty === null ? 'missing' : !row.counted ? 'stale' : row.qty === 0 ? 'zero' : 'ready';
+const labels = {missing:'Sin cantidad',stale:'Desactualizado',zero:'Agotado',ready:'Verificado'};
+const escape = value => String(value ?? '').replace(/[&<>"']/g, char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const seed = [];
+let rows = seed, view = 'stock', current = null, page = 1;
+const pageSize = 40;
+let deletedIds=[];
+function unpack(data){
+ const records=Array.isArray(data)?data:data?.rows;
+ const deleted=Array.isArray(data)?[]:data?.deletedIds;
+ if(!valid(records)||!Array.isArray(deleted)||!deleted.every(id=>typeof id==='string')) throw Error();
+ return {rows:loadRows(records,deleted),deleted};
+}
+function loadRows(stored,deleted) {
+ const removed=new Set(deleted);
+ stored=stored.filter(row=>!removed.has(row.id));
+ const ids = new Set(stored.map(row=>row.id));
+ const seedCategories = new Map(seed.map(row=>[row.id,row.category]));
+ return [...stored.map(({code,...row})=>({ ...row, name: row.name || (row.ref ? '' : (code || '')), category: row.category || seedCategories.get(row.id) || '' })),...seed.filter(row=>!ids.has(row.id)&&!removed.has(row.id))];
+}
+function notify(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error);}
+function valid(data){
+ return Array.isArray(data) && new Set(data.map(r=>r?.id)).size===data.length && data.every(r=>r && typeof r.id==='string' && fields.every(f=>typeof r[f]==='string') && (r.qty===null || (Number.isSafeInteger(r.qty)&&r.qty>=0)) && (r.price===null || (Number.isSafeInteger(r.price)&&r.price>=0)) && typeof r.counted==='string' && (!r.counted || Number.isFinite(Date.parse(r.counted))) && displayName(r).trim() && extraFields.every(f=>r[f]===undefined || typeof r[f]==='string'));
+}
+async function loadInventory(){
+ if(busy) return;
+ busy=true;
+ try{
+  const access=await db.from('pyr22_usuarios').select('id').limit(1);
+  if(access.error) throw access.error;
+  if(!access.data.length) throw new Error('Esta cuenta todavía no tiene permiso para el inventario.');
+  const records=[];
+  let lastId;
+  while(true){
+   let query=db.from('pyr22_repuestos').select('id,datos,revision').order('id').limit(500);
+   if(lastId!==undefined) query=query.gt('id',lastId);
+   const {data,error}=await query;
+   if(error) throw error;
+   records.push(...data);
+   if(data.length<500) break;
+   lastId=data.at(-1).id;
+  }
+  const data=unpack({rows:records.filter(r=>r.datos!==null).map(r=>r.datos),deletedIds:records.filter(r=>r.datos===null).map(r=>r.id)});
+  revisions.clear();
+  for(const record of records) revisions.set(record.id,record.revision);
+  rows=data.rows;deletedIds=data.deleted;
+  main.hidden=false;$('acceso').hidden=true;render();
+  notify(rows.length?'Inventario conectado a Supabase.':'Base lista. Usa Restaurar respaldo para cargar el inventario.');
+ }catch(error){
+  if(main.hidden) $('loginStatus').textContent=error.message||'No se pudo cargar el inventario.';
+  else notify('No se pudo actualizar el inventario.',true);
+ }finally{busy=false;}
+}
+async function save(next,message,deleted=deletedIds){
+ if(busy) return false;
+ const earlier=new Map(rows.map(row=>[row.id,row]));
+ const nextIds=new Set(next.map(row=>row.id));
+ const removed=new Set([...deleted,...rows.filter(row=>!nextIds.has(row.id)).map(row=>row.id)].filter(id=>!nextIds.has(id)));
+ const changes=[];
+ for(const row of next){
+  if(JSON.stringify(earlier.get(row.id))!==JSON.stringify(row)) changes.push({id:row.id,datos:row,revision:revisions.get(row.id)??0});
+ }
+ for(const id of removed){
+  if(earlier.has(id)||!revisions.has(id)) changes.push({id,datos:null,revision:revisions.get(id)??0});
+ }
+ busy=true;
+ try{
+  if(changes.length){
+   const {error}=await db.rpc('pyr22_guardar',{cambios:changes});
+   if(error) throw error;
+   for(const change of changes) revisions.set(change.id,change.revision+1);
+  }
+  rows=next;deletedIds=[...new Set([...deletedIds,...removed])].filter(id=>!nextIds.has(id));render();notify(message);return true;
+ }catch(error){
+  const message=error.code==='40001'?'El registro cambió en otro equipo. Actualiza la vista y vuelve a intentarlo.':'No se pudo confirmar el guardado. Actualiza la vista y verifica el cambio.';
+  notify(message,true);
+  if(document.querySelector('dialog[open]')) alert(message);
+  return false;
+ }finally{busy=false;}
+}
+function distinct(values){return [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));}
+const refKey=row=>norm(row.ref).replace(/\s+/g,'');
+function refCounts(){
+ const counts=new Map();
+ for(const row of rows){const ref=refKey(row);if(ref) counts.set(ref,(counts.get(ref)??0)+1);}
+ return counts;
+}
+function visible(counts=refCounts()){
+ const words=norm($('query').value).split(/\s+/).filter(Boolean);
+ return rows.filter(row=>{
+  const state=status(row), filter=$('state').value;
+  return (view!=='duplicates'||counts.get(refKey(row))>1)&&words.every(word=>norm((view==='catalog'?fields.filter(f=>!['notes','location','type'].includes(f)):[...fields,'supplier']).map(f=>row[f]).join(' ')).includes(word)) &&
+   filters.every(f=>!$(f).value || (f==='vehicle'?vehicles(row).includes($(f).value):f==='location'?locationOptions(row).includes($(f).value):row[f]===$(f).value)) &&
+   (view==='catalog'||!filter||(filter==='pending'?['missing','stale'].includes(state):state===filter));
+ }).sort((a,b)=>(view==='duplicates'?refKey(a).localeCompare(refKey(b),'es',{numeric:true}):0)||(view==='count'?a.location.localeCompare(b.location,'es',{numeric:true}):0)||displayName(a).localeCompare(displayName(b),'es',{numeric:true}));
+}
+function categoryOptions(){
+ const options=new Map();
+ for(const value of [...defaultCategories,...rows.map(row=>row.category)]) {
+  if(value && !options.has(norm(value))) options.set(norm(value),value);
+ }
+ return distinct([...options.values()]);
+}
+function render(){
+ $('total').textContent=rows.length;$('pending').textContent=rows.filter(r=>['missing','stale'].includes(status(r))).length;$('zero').textContent=rows.filter(r=>status(r)==='zero').length;
+ const catalog=view==='catalog';
+ for(const f of filters){
+  const select=$(f), currentValue=select.value, values=distinct(f==='vehicle'?rows.flatMap(vehicles):f==='location'?rows.flatMap(locationOptions):f==='category'?[...defaultCategories,...rows.map(r=>r.category)]:rows.map(r=>r[f]));
+  select.replaceChildren(new Option('Todos', ''),...values.map(value=>new Option(value,value)));
+  if(values.includes(currentValue)) select.value=currentValue;
+ }
+ $('categories').replaceChildren(...categoryOptions().map(value=>new Option(value,value)));
+ $('brands').replaceChildren(...distinct(rows.map(r=>r.brand)).map(value=>new Option(value,value)));
+ document.querySelectorAll('[data-view]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.view===view));
+ $('stateLabel').hidden=catalog;$('location').parentElement.hidden=catalog;$('csv').hidden=!catalog;
+ $('heading').textContent={stock:'Repuestos',count:'Recorrido por ubicación',duplicates:'Referencias repetidas',catalog:'Catálogo comercial'}[view];
+ const counts=refCounts();const filtered=visible(counts);
+ const lastPage=Math.max(1,Math.ceil(filtered.length/pageSize));
+ page=Math.min(page,lastPage);
+ $('pages').hidden=lastPage===1;
+ $('prev').disabled=page===1;$('next').disabled=page===lastPage;
+ $('pageLabel').textContent='Página '+page+' de '+lastPage;
+ $('result').textContent=filtered.length+' '+(filtered.length===1?'resultado':'resultados');$('list').classList.toggle('catalog',catalog);
+ $('list').innerHTML=filtered.length?filtered.slice((page-1)*pageSize,page*pageSize).map(row=>{
+  const s=status(row), name=escape(displayName(row)), details=[row.name?row.ref:'',row.category,row.brand].filter(Boolean).map(escape).join(' · ');
+  const price=row.price===null?'Precio por consultar':money.format(row.price), fit=escape(row.vehicle);
+  return '<article class="card"><div><h3>'+name+'</h3>'+(details?'<p class="muted">'+details+'</p>':'')+(view==='duplicates'?'<p><span class="tag warn">'+escape(row.ref)+' · '+counts.get(refKey(row))+' fichas</span></p>':'')+(fit?'<p class="muted">'+fit+'</p>':'')+(!catalog&&row.notes?'<p class="muted">'+escape(row.notes)+'</p>':'')+'</div>'+
+    (catalog?'<div>'+price+'</div><span class="tag '+(s==='ready'?'':s==='zero'?'zero':'warn')+'">'+({ready:'Disponible',zero:'Agotado',missing:'Consultar disponibilidad',stale:'Consultar disponibilidad'}[s])+'</span>':
+    '<div><strong>'+escape(row.location||'Por ubicar')+'</strong><p class="muted">'+escape(row.type||'Tipo por confirmar')+'</p>'+((row.legacyAisle||row.legacyShelf)?'<p class="muted">Excel · Fila '+escape(row.legacyAisle||'—')+' · Estante '+escape(row.legacyShelf||'—')+'</p>':'')+'</div><div><strong>'+(row.qty===null?'Sin dato':row.qty+' und.')+'</strong><p><span class="tag '+(s==='zero'?'zero':s==='ready'?'':'warn')+'">'+labels[s]+'</span></p><p class="muted">'+price+'</p></div><div class="actions"><button class="primary" data-count="'+escape(row.id)+'">Contar</button><button data-edit="'+escape(row.id)+'">Editar</button><button class="remove" data-remove="'+escape(row.id)+'">Eliminar</button></div>')+'</article>';
+ }).join(''):'<div class="empty"><h3>'+(rows.length?'Sin coincidencias':'Aún no hay repuestos')+'</h3><p class="muted">'+(rows.length?'Prueba otro filtro o término de búsqueda.':'Agrega un repuesto con su ubicación para comenzar el conteo.')+'</p></div>';
+}
+function clearFilters(){page=1;for(const f of ['query','state',...filters]) $(f).value='';}
+function switchView(next){page=1;view=next;if(next==='duplicates') clearFilters();if(next==='catalog') $('location').value='';render();}
+function openEditor(row){
+ current=row;$('form').reset();$('editorTitle').textContent=row?'Editar repuesto':'Nuevo repuesto';
+ if(row) for(const f of [...editableFields,'qty','price']) $('form').elements[f].value=row[f]??'';
+ else if(rows.some(row=>row.location && row.location===$('location').value)) $('form').elements.location.value=$('location').value;
+ $('editor').showModal();
+}
+function saveRow(row,message){
+ const next=current?rows.map(r=>r.id===current.id?row:r):[...rows,row];
+ return save(next,message);
+}
+$('form').onsubmit=async event=>{
+ event.preventDefault();
+ const form=event.currentTarget.elements;
+ const row=Object.fromEntries(editableFields.map(f=>[f,form[f].value.trim()]));
+ if(!row.ref&&!row.name){form.name.setCustomValidity('Escribe un nombre o una referencia.');form.name.reportValidity();return;}
+ row.category=categoryOptions().find(value=>norm(value)===norm(row.category))??row.category;
+ row.location=row.location.toUpperCase().replace(/\s+/g,'');
+ if(row.location && row.type==='Estante' && !/^[A-Z]+-?[1-9]\d*-[1-9]\d*$/.test(row.location)){
+  form.location.setCustomValidity('Para estantes usa fila, estante y nivel, por ejemplo H3-4.');form.location.reportValidity();return;
+ }
+ if(row.type==='Estante') row.location=row.location.replace(/^([A-Z]+)-/,'$1');
+ row.id=current?.id??(crypto.randomUUID?.() ?? 'local-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+ row.qty=form.qty.value===''?null:form.qty.valueAsNumber;
+ row.price=form.price.value===''?null:form.price.valueAsNumber;
+ if(![row.qty,row.price].every(value=>value===null||Number.isSafeInteger(value))){alert('Usa cantidades y precios enteros válidos.');return;}
+ row.counted=row.qty===null?'':current?.qty===row.qty?current.counted:new Date().toISOString();
+ if(await saveRow(row,'Repuesto guardado.')) $('editor').close();
+};
+$('form').addEventListener('input',()=>{for(const field of ['name','location']) $('form').elements[field].setCustomValidity('');});
+$('form').addEventListener('change',()=> $('form').elements.location.setCustomValidity(''));
+$('countForm').onsubmit=async event=>{
+ event.preventDefault();
+ const qty=event.currentTarget.elements.qty.valueAsNumber;
+ if(!Number.isSafeInteger(qty)) return;
+ if(await saveRow({...current,qty,counted:new Date().toISOString()},'Conteo guardado para '+displayName(current)+'.')) $('counter').close();
+};
+$('add').onclick=()=>openEditor(null);
+$('clear').onclick=()=>{clearFilters();render();};
+function refreshFilters(){page=1;render();}
+$('query').oninput=refreshFilters;
+for(const f of [...filters,'state']) $(f).onchange=refreshFilters;
+$('prev').onclick=()=>{page--;render();$('heading').scrollIntoView({block:'start'});};
+$('next').onclick=()=>{page++;render();$('heading').scrollIntoView({block:'start'});};
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{clearFilters();$('state').value=b.dataset.status;switchView('stock');});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+$('list').onclick=event=>{
+ const b=event.target.closest('button');if(!b)return;
+ const row=rows.find(r=>r.id===(b.dataset.edit??b.dataset.count??b.dataset.remove));if(!row)return;
+ if(b.dataset.remove){
+  if(confirm('¿Eliminar '+displayName(row)+' del inventario?')){
+   save(rows.filter(item=>item.id!==row.id),'Repuesto eliminado.',[...deletedIds,row.id]);
+  }
+  return;
+ }
+ if(b.dataset.edit){openEditor(row);return;}
+ current=row;$('countForm').reset();$('countTitle').textContent=displayName(row);
+ $('countLocation').textContent=(row.type||'Tipo por confirmar')+' · '+(row.location||'Por ubicar')+(row.qty===null?'':' · Registrado: '+row.qty+' und.');
+ $('counter').showModal();
+};
+function download(name,content,type){
+ const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('backup').onclick=()=>download('inventario-pyr22.json',JSON.stringify({rows,deletedIds},null,2),'application/json');
+$('restore').onclick=()=>$('file').click();
+$('file').onchange=async event=>{
+ const file=event.target.files[0];event.target.value='';if(!file)return;
+ try{const data=unpack(JSON.parse(await file.text()));
+  if(!rows.length||confirm('¿Reemplazar el inventario compartido con el respaldo?')) {clearFilters();await save(data.rows,'Respaldo restaurado.',data.deleted);}
+ }catch{notify('El archivo no es un respaldo válido de Inventario PYR22.',true);}
+};
+$('recount').onclick=()=>{if(rows.length&&confirm('¿Marcar todos los repuestos para reconteo conservando sus cantidades registradas?')) save(rows.map(r=>({...r,counted:''})),'Repuestos marcados para reconteo.');};
+$('csv').onclick=()=>{
+ const quote=value=>{const raw=String(value??'');return '"'+(/^[\s]*[=+@-]/.test(raw)?"'"+raw:raw).replaceAll('"','""')+'"';};
+ const data=[['Nombre','Referencia','Categoría','Marca','Vehículos','Precio COP','Disponibilidad'],...visible().map(r=>[r.name,r.ref,r.category,r.brand,r.vehicle,r.price,({ready:'Disponible',zero:'Agotado',missing:'Por consultar',stale:'Por consultar'})[status(r)]])];
+ download('catalogo-pyr22.csv','\uFEFF'+data.map(line=>line.map(quote).join(';')).join('\r\n'),'text/csv;charset=utf-8');
+};
+$('backup').closest('details').querySelector('.help').textContent='Descarga un respaldo JSON del inventario compartido.';
+$('reload').onclick=loadInventory;
+$('login').onsubmit=async event=>{
+ event.preventDefault();
+ if(!db||busy) return;
+ const form=event.currentTarget;
+ const button=form.querySelector('button');
+ button.disabled=true;$('loginStatus').textContent='Conectando…';
+ try{
+  const {error}=await db.auth.signInWithPassword({email:form.elements.email.value.trim(),password:form.elements.password.value});
+  if(error) throw error;
+  form.reset();await loadInventory();
+ }catch{$('loginStatus').textContent='No se pudo iniciar sesión. Revisa el correo y la contraseña.';}
+ finally{button.disabled=false;}
+};
+$('logout').onclick=async()=>{
+ if(busy) return;
+ const {error}=await db.auth.signOut({scope:'local'});
+ if(error){notify('No se pudo cerrar la sesión.',true);return;}
+ rows=[];deletedIds=[];revisions.clear();render();main.hidden=true;$('acceso').hidden=false;$('loginStatus').textContent='';
+};
+if(db) db.auth.getSession().then(({data})=>{if(data.session) loadInventory();});
+else $('loginStatus').textContent='No se pudo cargar la conexión con Supabase. Recarga la página.';
+render();
+</script></body></html>
